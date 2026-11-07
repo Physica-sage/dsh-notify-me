@@ -1,18 +1,18 @@
-# dependencies
 node_modules/
-
-# local npm cache (used when the sandbox blocks the global cache) + tarballs
 .npm-cache/
 *.tgz
-
-# logs / OS noise
 npm-debug.log*
 Thumbs.db
 .DS_Store
-
-# local scratch (never commit: draft reports, probe scripts, one-off artifacts)
 temp/
 temp-*/
-
-# local agent instructions (carry machine paths & ecosystem notes)
 AGENTS.md
+android/.gradle/
+android/**/build/
+android/local.properties
+android/app/google-services.json
+.secrets/
+artifacts/
+*.jks
+*.keystore
+firebase-debug.log

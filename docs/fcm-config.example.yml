@@ -1,0 +1,13 @@
+# Advanced compatibility only: normally configure FCM in the plugin settings UI.
+# No deployment URL or Firebase project is built in.
+- patch:
+    - id: notify-me
+      config:
+        fcm:
+          enabled: false
+          # Optional migration from an existing private sender file:
+          # serviceAccountFile: /absolute/private/path/fcm-sender.json
+          # publicUrl: https://dsh.example/
+          # projectId: your-firebase-project
+          # Optional private storage override:
+          # settingsFile: /absolute/private/path/fcm-settings.json

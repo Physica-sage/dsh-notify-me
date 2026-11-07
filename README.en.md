@@ -1,3 +1,5 @@
+> **FCM development fork**: select FCM in external notification settings to save server-side configuration, upload credentials, pair and manage devices. The APK has an empty first-run server URL. Read [setup and security notes](docs/FCM.md) first. Preview build; physical-device end-to-end acceptance is still pending. Upstream documentation is preserved below.
+
 <div align="center">
 
 <img src="https://raw.githubusercontent.com/chromoany/dsh-notify-me/main/docs/brand/header.jpg" width="100%" alt="Banner: a lit bell mark over a dark desk scene, titled dsh-notify-me, subtitled Step away. Stay informed.">

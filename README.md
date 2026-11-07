@@ -1,3 +1,5 @@
+> **FCM 开发分支**：外部通知可直接选择 FCM，在插件设置内保存到服务端、上传发送凭据、配对和管理设备；APK 首次启动地址为空。请先阅读 [FCM 安装与安全说明](docs/FCM.md)。这是预览版本，尚未完成手机端端到端验收；以下为保留的上游功能文档。
+
 <div align="center">
 
 <img src="https://raw.githubusercontent.com/chromoany/dsh-notify-me/main/docs/brand/header.jpg" width="100%" alt="仓库头图：深色桌面上亮起的铃铛标志，标题 dsh-notify-me，副标题 Step away. Stay informed.">

@@ -2124,6 +2124,17 @@ function toastTagLimits() {
 // ── settings page: the new rows actually render ───────────────────────────
 // Hook state is kept per index and survives re-renders, the way React keeps it,
 // so a case can press a control and then read the copy the press produced.
+function fcmChannelSettings() {
+  console.log('\n— FCM is selectable in the real notification settings view —');
+  const ui = settingsBoot(null, null, { advanced: true });
+  const select = ui.find(n => n.type === 'select' && n.props && n.props['aria-label'] === 'External notification channel');
+  assert(select, 'external notification channel selector exists');
+  assert(ui.find(n => n.type === 'option' && n.props && n.props.value === 'fcm'), 'FCM is a channel choice');
+  select.props.onChange({ currentTarget: { value: 'fcm' } });
+  ui.renderNow();
+  assert(ui.find(n => typeof n.type === 'function' && n.type.name === 'FcmSettingsPanel'), 'selecting FCM mounts the server-owned settings panel');
+  console.log('FCM settings integration OK: channel selector opens server settings');
+}
 function makeFakeReact() {
   const hooks = [];
   let cursor = 0;
@@ -2137,6 +2148,11 @@ function makeFakeReact() {
       const i = cursor++;
       if (!(i in hooks)) hooks[i] = typeof init === 'function' ? init() : init;
       return [hooks[i], (n) => { hooks[i] = (typeof n === 'function') ? n(hooks[i]) : n; }];
+    },
+    useRef(init) {
+      const i = cursor++;
+      if (!(i in hooks)) hooks[i] = { current: init };
+      return hooks[i];
     },
     useSyncExternalStore() { return { active: 'zh' }; },
     // There is no commit phase here: run the effect body once and drop the
@@ -4150,6 +4166,7 @@ function mutedSessionsUi() {
 }
 
 (async () => {
+  fcmChannelSettings();
   await legacyHost();
   await currentHost();
   await modernHost();

@@ -1,4 +1,4 @@
-# Tests only: the plugin has no build step and no dependencies, so this runs
+# Desktop regression and native FCM backend tests; Firebase delivery is mocked.
 # the suites straight from the checkout on both platforms that ship a desktop
 # shell. Ubuntu is the case that would have caught the 1.14.0 Linux raise
 # regression; Windows exercises the PowerShell verdict path in
@@ -7,7 +7,7 @@ name: test
 
 on:
   push:
-    branches: [main]
+    branches: [main, fcm-android]
   pull_request:
   workflow_dispatch:
 
@@ -27,13 +27,13 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest]
-        node: [18, 22]
+        node: [24]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node }}
-      # No install step on purpose: package.json declares no dependencies, and
-      # the suites load only Node built-ins plus the checkout itself.
+      # Install locked dependencies; tests do not need Firebase account credentials.
+      - run: npm ci --ignore-scripts
       - run: npm test
       - run: npm run pack
