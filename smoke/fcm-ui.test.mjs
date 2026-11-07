@@ -51,7 +51,7 @@ test('FCM is a selectable external channel; form initially contains no deploymen
   assert.equal(ui.input('FCM public URL').value, ''); assert.equal(ui.input('FCM project ID').value, '');
   assert.ok(ui.button('保存到服务端')); assert.ok(ui.button('生成配对码'));
   assert.equal(ui.button('生成配对码').disabled, true);
-  assert.equal(ui.calls[0].channel, '/dsh-notify-fcm'); assert.equal(ui.calls[0].endpoint, 'control');
+  assert.equal(ui.calls[0].channel, '/api'); assert.equal(ui.calls[0].endpoint, 'notify-me-fcm/control');
 });
 test('form saves credentials only through owner Connection and never writes browser storage', async t => {
   const ui = await render(t); let writes = 0;

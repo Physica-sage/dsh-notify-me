@@ -5,7 +5,7 @@ import { mkdtemp, readFile, stat, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { rm } from 'node:fs/promises';
-import { FcmSettings, fcmControlHandler, mountFcmSettings, parseFcmCredential, FCM_CONTROL, FCM_CHANNEL } from '../lib/fcm-settings.js';
+import { FcmSettings, fcmControlHandler, mountFcmSettings, parseFcmCredential, FCM_CONTROL } from '../lib/fcm-settings.js';
 const { privateKey } = generateKeyPairSync('rsa', { modulusLength: 2048, privateKeyEncoding: { type: 'pkcs8', format: 'pem' }, publicKeyEncoding: { type: 'spki', format: 'pem' } });
 const account = { type: 'service_account', project_id: 'test-project', client_email: 'sender@test-project.iam.gserviceaccount.com', private_key: privateKey };
 const config = { enabled: true, publicUrl: 'https://dsh.example/', projectId: 'test-project', serviceAccountJson: JSON.stringify(account), expectedRevision: 0 };
@@ -59,10 +59,10 @@ test('owner RPC gate rejects guests and missing principals before looking at sen
 test('registration uses the authenticated shared Connection, not an unauthenticated web route', async t => {
   const directory = await mkdtemp(join(tmpdir(), 'fcm-settings-rpc-')); t.after(() => rm(directory, { recursive: true, force: true }));
   let registered, disposed = false;
-  const ctx = { connection: { rpc: { handle(channel, handler) { registered = { channel, handler }; return async () => { disposed = true; }; } } } };
+  const ctx = { connection: { browserPeer: owner, fetch: { register(route) { registered = route; return async () => { disposed = true; }; } } } };
   const scope = await mountFcmSettings(ctx, { settingsFile: join(directory, 'settings.json') });
-  assert.equal(registered.channel, FCM_CHANNEL);
-  assert.equal((await registered.handler(FCM_CONTROL, { action: 'get' }, undefined, owner)).value.enabled, false);
+  assert.equal(registered.path, '/api/' + FCM_CONTROL); assert.deepEqual(registered.methods, ['POST']);
+  assert.equal((await registered.fetch(new Request('http://dsh.example/api/' + FCM_CONTROL, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ type: 'client-request', rpcId: 'fixture', method: FCM_CONTROL, payload: { action: 'get' } }) }))).status, 200);
   await scope.dispose(); assert.equal(disposed, true);
 });
 test('credential parser discards all attacker-selected OAuth URLs and reports no private data', () => {

@@ -45,11 +45,11 @@ HTTP v1 已做 `validate_only` 验证。它只能证明账号、API 与发送权
 4. 选择推送事件与是否包含内容摘要，打开 FCM 开关，点击 **保存到服务端**。无需复制私钥进 profile，也不需要管理员令牌。
 5. 点击 **验证 Firebase 权限**，再 **生成配对码**。手机配对后可 **刷新设备**、**撤销设备**、**发送 FCM 测试通知**。
 
-FCM 配置通过 DSH Connection 的独立鉴权 RPC 通道管理。传输先走宿主 Host/Origin 与登录认证，业务层再要求 owner Peer；不占用 `/api` 的唯一共享拦截器，不提供任何未鉴权的凭据读取/写入路由。读取只回传 `hasCredentials`，不会回传私钥或服务账号正文。空上传保留原凭据；“停用并移除凭据”必须显式确认。
+FCM 配置通过 DSH Connection 的 `/api` 精确 Fetch 路由管理。传输先走宿主 Host/Origin 与登录认证，精确路由只允许 owner Peer；不新增根路径，也不要求 CDN 额外转发一个自定义顶层 URL。读取只回传 `hasCredentials`，不会回传私钥或服务账号正文。空上传保留原凭据；“停用并移除凭据”必须显式确认。
 
 配置保存在 `$DSH_HOME/dsh-notify-me/fcm-settings.json`（未设 DSH_HOME 时为用户目录下对应位置），以 0600 原子写入；有并发修订检查和失败回滚。换浏览器和重启服务器后仍从服务器读取，不使用 localStorage 存放 FCM 配置或凭据。FCM 开关独立于当前浏览器的本地提醒开关。原有其他外部通知渠道的设置没有被迁移或偷偷启用。
 
-CDN 前端保持有效 HTTPS；源站可以仍监听 HTTP。需要保留登录 Cookie、Authorization、JSON POST，且 `/dsh-notify-fcm/*` 设置通道和 `/__dsh-notify-me/fcm/*` 原生通知路径不能被缓存、重定向或人机挑战拦截。上传服务账号仅允许 HTTPS 或本机通道；网页会拒绝把所选私钥上传到远程明文 HTTP。带子路径的部署应在地址中保留该子路径。
+CDN 前端保持有效 HTTPS；源站可以仍监听 HTTP。需要保留登录 Cookie、Authorization、JSON POST，且 `/api/notify-me-fcm/control` 的 POST 请求不能被缓存、重定向或人机挑战拦截。上传服务账号仅允许 HTTPS 或本机通道；网页会拒绝把所选私钥上传到远程明文 HTTP。带子路径的部署应在地址中保留该子路径。
 
 `docs/fcm-config.example.yml` 仅保留给兼容旧版或指定存储路径的高级用户，不是图形配置的前置步骤。
 
