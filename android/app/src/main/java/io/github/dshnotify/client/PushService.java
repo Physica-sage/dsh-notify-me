@@ -46,10 +46,16 @@ public final class PushService extends FirebaseMessagingService {
     if (Build.VERSION.SDK_INT >= 31) b.setAuthenticationRequired(true);
     return b.build();
   }
+  static Intent browserOpen(Context context, String url) {
+    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+    // A stable caller ID asks Chromium-family browsers such as Edge to reuse the
+    // notification-created tab. The browser owns the final tab-selection policy.
+    intent.putExtra(android.provider.Browser.EXTRA_APPLICATION_ID, context.getPackageName());
+    return intent;
+  }
   static Notification.Builder note(Context c, String tag, String title, String session, String text, String url, boolean attention) {
     channels(c);
-    Intent open = new Intent(Intent.ACTION_VIEW, Uri.parse(url)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-    PendingIntent click = PendingIntent.getActivity(c, tag.hashCode(), open, PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
+    PendingIntent click = PendingIntent.getActivity(c, tag.hashCode(), browserOpen(c, url), PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
     return new Notification.Builder(c, attention ? ATTENTION : DONE).setSmallIcon(R.drawable.ic_notify)
       .setContentTitle(title + (session.isEmpty() ? "" : " · " + session)).setContentText(text)
       .setStyle(new Notification.BigTextStyle().bigText(text)).setContentIntent(click).setAutoCancel(true)

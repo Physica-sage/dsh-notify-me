@@ -84,10 +84,17 @@ test('corrupt saved settings fail closed and remain untouched', async t => {
   assert.equal(await readFile(f.initial.settingsFile, 'utf8'), '{broken');
 });
 test('pairing, device management, validation and send test keep acceptance distinct from delivery', async t => {
-  const { manager } = await fixture(t); await manager.save(config);
+  const { manager, mounted } = await fixture(t); await manager.save(config);
   assert.equal((await manager.control({ action: 'pairing-code' })).pairingCode, 'one-use');
   assert.equal((await manager.control({ action: 'devices' })).devices[0].name, 'Phone');
   assert.equal((await manager.control({ action: 'revoke', deviceId: 'device-1' })).devices.length, 1);
   assert.deepEqual(await manager.control({ action: 'validate' }), { validated: true, delivered: false });
   assert.deepEqual(await manager.control({ action: 'test' }), { accepted: 1, failed: 0, delivered: false });
+  mounted[0].sender.validate = async () => { throw Object.assign(new Error("Permission 'cloudmessaging.messages.create' denied; https://provider.example?private_key=DO-NOT-RETURN"), { code: 'messaging/mismatched-credential' }); };
+  const denied = await fcmControlHandler(manager)(FCM_CONTROL, { action: 'validate' }, undefined, owner);
+  assert.equal(denied.error.code, 'fcm/permission-denied'); assert.match(denied.error.message, /cloudmessaging\.messages\.create/);
+  assert.ok(!JSON.stringify(denied).includes('private_key')); assert.ok(!JSON.stringify(denied).includes('DO-NOT-RETURN')); assert.ok(!JSON.stringify(denied).includes('provider.example'));
+  mounted[0].sender.send = async () => { throw Object.assign(new Error('network failure'), { code: 'app/network-error' }); };
+  const test = await manager.control({ action: 'test' });
+  assert.equal(test.failed, 1); assert.equal(test.delivered, false); assert.equal(test.failures[0].code, 'fcm/network-error');
 });
